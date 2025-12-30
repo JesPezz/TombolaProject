@@ -1,24 +1,53 @@
 <!DOCTYPE html>
-<html lang="es"> <head>
-    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tómbola Inteligente</title>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tómbola Admin</title>
     <style>
         body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4; }
-        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        input { padding: 10px; width: 80%; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
+        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); max-width: 400px; margin: auto; }
+        textarea { width: 90%; height: 150px; margin-bottom: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+        button { padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 5px;}
+        .nav { display: flex; margin-bottom: 20px; }
+        .nav button { background: #ddd; color: black; border-radius: 0; }
+        .nav button.active { background: #007bff; color: white; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Registro de Alumnos</h2>
-        <p>Ingresa tu nombre para participar:</p>
-        <form action="/registrar" method="GET">
-            <input type="text" name="nombre" placeholder="Nombre completo" required>
-            <br>
-            <button type="submit">Registrarme</button>
-        </form>
+        <div class="nav">
+            <button id="btnRegistro" class="active" onclick="show('registro')">Registro</button>
+            <button id="btnAdmin" onclick="show('admin')">Admin</button>
+        </div>
+
+        <div id="registro">
+            <h2>Pasar Lista</h2>
+            <form action="/registrar" method="GET">
+                <input type="text" name="nombre" placeholder="Tu nombre..." required style="width: 85%; padding: 10px; margin-bottom: 10px;">
+                <button type="submit">¡Registrarme!</button>
+            </form>
+        </div>
+
+        <div id="admin" style="display:none;">
+            <h2>Carga Masiva</h2>
+            <p style="font-size: 12px; color: #666;">Pega aquí la lista de Excel (un nombre por línea)</p>
+            <form action="/upload_nombres" method="POST">
+                <textarea name="lista" placeholder="Alumno 1&#10;Alumno 2..."></textarea>
+                <button type="submit" style="background-color: #28a745;">Guardar Lista Completa</button>
+            </form>
+            <hr>
+            <button onclick="location.href='/reset_lista'" style="background-color: #dc3545;">Borrar Todo</button>
+        </div>
     </div>
+
+    <script>
+        function show(id) {
+            document.getElementById('registro').style.display = id === 'registro' ? 'block' : 'none';
+            document.getElementById('admin').style.display = id === 'admin' ? 'block' : 'none';
+            document.getElementById('btnRegistro').className = id === 'registro' ? 'active' : '';
+            document.getElementById('btnAdmin').className = id === 'admin' ? 'active' : '';
+        }
+    </script>
 </body>
 </html>
