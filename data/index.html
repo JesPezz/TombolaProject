@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es"> <head>
+    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tómbola Inteligente</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4; }
+        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        input { padding: 10px; width: 80%; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Registro de Alumnos</h2>
+        <p>Ingresa tu nombre para participar:</p>
+        <form action="/registrar" method="GET">
+            <input type="text" name="nombre" placeholder="Nombre completo" required>
+            <br>
+            <button type="submit">Registrarme</button>
+        </form>
+    </div>
+</body>
+</html>
