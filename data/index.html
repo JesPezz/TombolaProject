@@ -41,6 +41,13 @@
         </div>
     </div>
 
+    <div class="card">
+    <h3>Cargar Banco de Preguntas</h3>
+    <textarea id="txtPreguntas" rows="10" style="width:100%" placeholder="Una pregunta por linea..."></textarea>
+    <br>
+    <button onclick="subirPreguntas()">Guardar Preguntas</button>
+</div>
+
     <script>
         function show(id) {
             document.getElementById('registro').style.display = id === 'registro' ? 'block' : 'none';
@@ -48,6 +55,15 @@
             document.getElementById('btnRegistro').className = id === 'registro' ? 'active' : '';
             document.getElementById('btnAdmin').className = id === 'admin' ? 'active' : '';
         }
+
+        function subirPreguntas() {
+    let contenido = document.getElementById("txtPreguntas").value;
+    let formData = new FormData();
+    formData.append("preguntas", contenido);
+
+    fetch("/upload_preguntas", { method: "POST", body: formData })
+    .then(r => r.text()).then(t => alert(t));
+}
     </script>
 </body>
 </html>
