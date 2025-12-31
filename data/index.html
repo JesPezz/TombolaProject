@@ -46,10 +46,22 @@
     <textarea id="txtPreguntas" rows="10" style="width:100%" placeholder="Una pregunta por linea..."></textarea>
     <br>
     <button onclick="subirPreguntas()">Guardar Preguntas</button>
+
+    <div class="card" style="text-align: center;">
+    <h2>¡Regístrate aquí!</h2>
+    <div id="qrcode"></div>
+    <p>Conéctate al WiFi y escanea para participar</p>
 </div>
 
     <script>
-        function show(id) {
+        // Genera el QR dinámicamente según la IP que tenga el ESP32
+    var ip = window.location.hostname;
+    var url = "http://" + ip + "/registro_alumno.html"; // Página simple para el alumno
+    var qrUrl = "https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=" + encodeURIComponent(url);
+    
+    document.getElementById("qrcode").innerHTML = `<img src="${qrUrl}" alt="QR Code">`;
+       
+    function show(id) {
             document.getElementById('registro').style.display = id === 'registro' ? 'block' : 'none';
             document.getElementById('admin').style.display = id === 'admin' ? 'block' : 'none';
             document.getElementById('btnRegistro').className = id === 'registro' ? 'active' : '';

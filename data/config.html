@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración WiFi</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
+        select, input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>WiFi Escolar</h2>
+        <form action="/save_wifi" method="POST">
+            <label for="redes">Selecciona Red:</label>
+            <select name="ssid" id="redes" title="Selecciona una red WiFi disponible">
+                <option value="">Cargando redes...</option>
+            </select>
+            <label for="pass">Contraseña:</label>
+            <input type="password" id="pass" name="pass" placeholder="Contraseña de la red" required>
+            <button type="submit">Conectar Tómbola</button>
+        </form>
+    </div>
+    <script>
+        fetch('/scan').then(r => r.json()).then(data => {
+            let select = document.getElementById('redes');
+            select.innerHTML = "";
+            data.forEach(red => {
+                let opt = document.createElement('option');
+                opt.value = red; opt.innerHTML = red;
+                select.appendChild(opt);
+            });
+        });
+    </script>
+</body>
+</html>
