@@ -12,6 +12,9 @@
         .nav { display: flex; margin-bottom: 20px; }
         .nav button { background: #ddd; color: black; border-radius: 0; }
         .nav button.active { background: #007bff; color: white; }
+        #qrcode { margin: 20px auto; display: flex; justify-content: center; }
+        #qrcode img { border: 5px solid white; border-radius: 8px; }
+        .ip-link { display: block; margin-top: 10px; color: #007bff; text-decoration: none; font-size: 1.2em;}
     </style>
 </head>
 <body>
@@ -49,17 +52,44 @@
 
     <div class="card" style="text-align: center;">
     <h2>¡Regístrate aquí!</h2>
+    
     <div id="qrcode"></div>
-    <p>Conéctate al WiFi y escanea para participar</p>
+    
+    <p>O entra directamente a:</p>
+    <a id="linkTexto" class="ip-link" href="#">Cargando...</a>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <script>
-        // Genera el QR dinámicamente según la IP que tenga el ESP32
+        // 1. Obtener la IP actual y armar la URL de registro
     var ip = window.location.hostname;
-    var url = "http://" + ip + "/registro_alumno.html"; // Página simple para el alumno
-    var qrUrl = "https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=" + encodeURIComponent(url);
+    // Si estamos probando en PC local sin ESP32, usa localhost
+    if (!ip) ip = "localhost"; 
     
-    document.getElementById("qrcode").innerHTML = `<img src="${qrUrl}" alt="QR Code">`;
+    var urlRegistro = "http://" + ip + "/registro_alumno.html"; // Asegúrate que este archivo exista o redirige a /
+
+    // 2. Generar QR Localmente (No requiere Google API)
+    try {
+        var qrcode = new QRCode(document.getElementById("qrcode"), {
+            text: urlRegistro,
+            width: 180,
+            height: 180,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+    } catch (e) {
+        console.error("No se pudo cargar librería QR, usando respaldo de Google");
+        // Fallback a Google si la librería falla
+        document.getElementById("qrcode").innerHTML = 
+            `<img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(urlRegistro)}" alt="QR">`;
+    }
+
+    // 3. Actualizar el enlace de texto (Plan B infalible)
+    var link = document.getElementById("linkTexto");
+    link.href = urlRegistro;
+    link.innerText = "http://" + ip;
        
     function show(id) {
             document.getElementById('registro').style.display = id === 'registro' ? 'block' : 'none';

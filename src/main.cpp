@@ -255,10 +255,12 @@ void setup() {
 
     // --- RUTAS DEL SERVIDOR ---
 
+    // 1. Escaneo de redes (para el frontend)
     server.on("/scan", HTTP_GET, [](AsyncWebServerRequest *request){
         request->send(200, "application/json", redesEncontradas);
     });
 
+    // 2. Guardar WiFi
     server.on("/save_wifi", HTTP_POST, [](AsyncWebServerRequest *request){
         if(request->hasParam("ssid", true) && request->hasParam("pass", true)){
             JsonDocument doc; 
@@ -275,29 +277,25 @@ void setup() {
         }
     });
 
-    // CORRECCIÓN: Crear AMBOS archivos de listas al subir nombres
+    // 3. Subida de listas (Corregido para crear los 3 archivos)
     server.on("/upload_nombres", HTTP_POST, [](AsyncWebServerRequest *request) {
         if (request->hasParam("lista", true)) {
             String contenido = request->getParam("lista", true)->value();
-            
-            // 1. Maestro
-            File f1 = LittleFS.open("/maestro.txt", FILE_WRITE);
-            if(f1){ f1.print(contenido); f1.close(); }
-            
-            // 2. Lista Normal
-            File f2 = LittleFS.open("/lista.txt", FILE_WRITE);
-            if(f2){ f2.print(contenido); f2.close(); }
-
-            // 3. Lista Preguntas (ESTA ES LA QUE FALTABA)
-            File f3 = LittleFS.open("/lista_preguntas.txt", FILE_WRITE);
-            if(f3){ f3.print(contenido); f3.close(); }
-            
-            request->send(200, "text/plain", "Listas actualizadas correctamente.");
-        } else {
-            request->send(400, "text/plain", "Error datos.");
-        }
+            File f1 = LittleFS.open("/maestro.txt", FILE_WRITE); if(f1){f1.print(contenido); f1.close();}
+            File f2 = LittleFS.open("/lista.txt", FILE_WRITE); if(f2){f2.print(contenido); f2.close();}
+            File f3 = LittleFS.open("/lista_preguntas.txt", FILE_WRITE); if(f3){f3.print(contenido); f3.close();} // CRUCIAL
+            request->send(200, "text/plain", "Listas actualizadas.");
+        } else { request->send(400, "text/plain", "Error datos."); }
     });
 
+    // 4. Archivos estáticos
+    server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
+    server.on("/config", HTTP_GET, [](AsyncWebServerRequest *request){ request->send(LittleFS, "/config.html", "text/html"); });
+    
+    // Evitar error 404 del favicon
+    server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request){ request->send(404); });
+
+    // 5. Guardar preguntas
     server.on("/upload_preguntas", HTTP_POST, [](AsyncWebServerRequest *request) {
         if (request->hasParam("preguntas", true)) {
             String p = request->getParam("preguntas", true)->value();
@@ -307,6 +305,7 @@ void setup() {
         }
     });
 
+    // 6. Registrar alumno
     server.on("/registrar", HTTP_GET, [](AsyncWebServerRequest *request) {
         if(request->hasParam("nombre")) {
             String alum = request->getParam("nombre")->value();
@@ -322,20 +321,21 @@ void setup() {
         }
     });
 
-    server.on("/config", HTTP_GET, [](AsyncWebServerRequest *request){
-        request->send(LittleFS, "/config.html", "text/html");
-    });
+   // --- LÓGICA DE PORTAL CAUTIVO AGRESIVO ---
     
-    server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
+    // 7. Rutas trampa para Android y Windows
+    server.on("/generate_204", HTTP_GET, [](AsyncWebServerRequest *request){ request->redirect("http://192.168.4.1/config"); });
+    server.on("/fwlink", HTTP_GET, [](AsyncWebServerRequest *request){ request->redirect("http://192.168.4.1/config"); });
 
-    // SOLUCIÓN FAVICON (Para que no llene el log de errores)
-    server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request){
-        request->send(404);
-    });
-
-    // MEJORA PORTAL CAUTIVO: Redirigir todo a /config
+    // Catch-All: Si no encuentra la ruta, decide qué hacer según el modo
     server.onNotFound([](AsyncWebServerRequest *request){
-        request->redirect("http://192.168.4.1/config");
+        // Si estamos en modo AP (Configuración), forzamos ir a /config
+        if (WiFi.status() != WL_CONNECTED) {
+            request->redirect("http://192.168.4.1/config");
+        } else {
+            // Si ya estamos conectados al WiFi escolar, simplemente mandamos al index o damos 404
+            request->send(LittleFS, "/index.html", "text/html");
+        }
     });
 
     server.begin();
